@@ -1,0 +1,94 @@
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"github.com/hyperledger/fabric/core/chaincode/shim"
+	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/rs/xid"
+)
+
+var logger = shim.NewLogger("energyManagement-chaincode-log")
+
+//var logger = shim.NewLogger("dcot-chaincode")
+
+// DcotWorkflowChaincode implementation
+type EnergyManagementWorkFlow.go struct {
+	testMode bool
+}
+func (t *EnergyManagementWorkFlow) Init(stub shim.ChaincodeStubInterface) pb.Response {
+
+	logger.Info("Chaincode Interface - Init()\n")
+	logger.SetLevel(shim.LogDebug)
+	_, args := stub.GetFunctionAndParameters()
+	//var err error
+
+	// Upgrade Mode 1: leave ledger state as it was
+	if len(args) == 0 {
+		//logger.Info("Args correctly!!!")
+		return shim.Success(nil)
+	}
+
+	return shim.Success(nil)
+}
+
+func (t *EnergyManagementWorkFlow) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
+	var creatorOrg, creatorCertIssuer string
+	//var attrValue string
+	var err error
+	var isEnabled bool
+	var callerRole string
+
+	logger.Debug("Chaincode Interface - Invoke()\n")
+
+	if !t.testMode {
+		creatorOrg, creatorCertIssuer, err = getTxCreatorInfo(stub)
+		if err != nil {
+			logger.Error("Error extracting creator identity info: \n", err.Error())
+			return shim.Error(err.Error())
+		}
+		logger.Info("EnergyManagementWorkFlow Invoke by '', ''\n", creatorOrg, creatorCertIssuer)
+		callerRole, _, err = getTxCreatorInfo(stub)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		/* isEnabled, _, err = isInvokerOperator(stub, callerRole)
+		if err != nil {
+			logger.Error("Error getting attribute info: \n", err.Error())
+			return shim.Error(err.Error())
+		} */
+	}
+
+	function, args := stub.GetFunctionAndParameters()
+
+	if function == "putData" {
+		return t.putData(stub, args)
+	} else if function == "getData" {
+		return t.updateAnalyticsInstances(stub, args)
+	}
+	return shim.Error("Invalid invoke function name")
+}
+
+
+func (t *EnergyManagementWorkFlow) getData(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+
+
+
+}
+func (t *EnergyManagementWorkFlow) putData(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+
+
+
+}
+
+func main() {
+	twc := new(EnergyManagementWorkFlow)
+	twc.testMode = true
+	err := shim.Start(twc)
+	if err != nil {
+		logger.Error("Error starting Energy-Management-chaincode: ", err)
+	}
+}
